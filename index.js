@@ -1,6 +1,6 @@
-const filesize = require('filesize');
-const fs = require('fs');
 const puppeteer = require('puppeteer');
+const optimizeSvg = require('./src/optimizeSvg');
+const writeFile = require('./src/writeFile');
 
 (async function () {
   const browser = await puppeteer.launch();
@@ -81,36 +81,39 @@ const puppeteer = require('puppeteer');
     });
   }
 
-  async function writeToFile(filename, contents) {
-    await new Promise((resolve, reject) => {
-      fs.writeFile(filename, contents, (err) => {
-        if (err) {
-          console.log(err);
-          reject(err);
-        } else {
-          console.log(`Wrote ${filename} (${filesize(contents.length)})`);
-          resolve();
-        }
-      });
-    });
-  }
-
   const dancerName = 'cat';
-  const moveNames = ['claphigh', 'clown', 'dab', 'doublejam', 'drop', 'floss',
-    'fresh', 'kick', 'rest', 'roll', 'thisorthat', 'thriller', 'xarmsside',
-    'xarmsup', 'xclapside', 'xheadhips', 'xhighkick', 'xjump'];
+  const moveNames = [
+    'claphigh',
+    'clown',
+    'dab',
+    'doublejam',
+    'drop',
+    'floss',
+    'fresh',
+    'kick',
+    'rest',
+    'roll',
+    'thisorthat',
+    'thriller',
+    'xarmsside',
+    'xarmsup',
+    'xclapside',
+    'xheadhips',
+    'xhighkick',
+    'xjump',
+  ];
 
   await setup();
   for (let i = 0; i < moveNames.length; i++) {
+    console.log(`Rendering ${dancerName} ${moveNames[i]}...`);
     await renderAnimation(`${dancerName}_${moveNames[i]}`);
   }
 
   const result = await retrieveSvgMarkup();
-  if (!fs.existsSync('output')){
-    fs.mkdirSync('output');
-  }
-  const outputFilename = `output/${dancerName}.svg`;
-  await writeToFile(outputFilename, result);
+  await writeFile(`output/${dancerName}.svg`, result);
+
+  const optimized = await optimizeSvg(result);
+  await writeFile(`output/${dancerName}.min.svg`, optimized);
 
   await browser.close();
 }());

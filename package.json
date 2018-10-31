@@ -5,16 +5,22 @@
   "main": "index.js",
   "scripts": {
     "postinstall": "mkdir -p vendor && ln -fs ../node_modules/lottie-web/build/player vendor/lottie",
-    "web-server": "http-server -p 8081 . &",
-    "prestart": "npm run web-server",
+    "prestart": "npm run start-server",
     "start": "node index.js",
-    "poststart": "kill $(lsof -t -i:8081)"
+    "poststart": "npm run stop-server",
+    "start-server": "http-server -p 8081 . &",
+    "stop-server": "kill $(lsof -t -i:8081)"
   },
   "author": "",
   "license": "ISC",
-  "devDependencies": {
+  "dependencies": {
     "http-server": "^0.11.1",
     "lottie-web": "^5.4.1",
     "puppeteer": "^1.9.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.8.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0"
   }
 }

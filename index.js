@@ -58,11 +58,7 @@ const writeFile = require('./src/writeFile');
         const frameGroup = document.createElementNS(SVGNS, 'g');
         frameGroup.id = `${filename}_${i.toString(10).padStart(2, '0')}`;
         lottieSVG.childNodes.forEach((child) => {
-          if (child.nodeName === 'defs') {
-            if (i === 0) {
-              outputSVG.appendChild(child.cloneNode(true));
-            }
-          } else {
+          if (child.nodeName !== 'defs') {
             frameGroup.appendChild(child.cloneNode(true));
           }
         });

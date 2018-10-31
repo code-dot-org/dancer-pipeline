@@ -13,9 +13,11 @@ module.exports = function optimizeSvg(input) {
       indent: 2,
     },
     floatPrecision: 2,
-    plugins: [
-      {cleanupIDs: false},
-    ],
+    plugins: [{
+      removeAttrs: {
+        attrs: ['clip-path', 'display', 'style'],
+      },
+    }],
   });
   return svgo.optimize(input).then(result => result.data);
 };

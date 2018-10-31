@@ -1,46 +1,49 @@
 const puppeteer = require('puppeteer');
 
-(async () => {
+async function withPage(url, callback) {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-  await page.goto('http://localhost:8081/index.html');
-
-  const result = await page.evaluate(() => {
-    /* global document, lottie */
-
-    const container = document.createElement('div');
-    container.style.width = '400px';
-    container.style.height = '400px';
-    document.body.appendChild(container);
-
-    const animation = lottie.loadAnimation({
-      container,
-      renderer: 'svg',
-      loop: false,
-      autoplay: false,
-      path: 'test/fixtures/cat_claphigh.json',
-    });
-
-    return new Promise((resolve) => {
-      animation.addEventListener('DOMLoaded', () => {
-        resolve(container.querySelector('svg').outerHTML);
-      });
-    });
-
-    //
-    // const events = ['DOMLoaded', 'enterFrame', 'config_ready', 'data_ready'];
-    // events.forEach(eventName => {
-    //     animation.addEventListener(eventName, () => {
-    //         console.groupCollapsed(eventName);
-    //         console.log('animation', animation);
-    //         console.log(document.querySelector('svg').outerHTML);
-    //         console.groupEnd();
-    //     })
-    // });
-  });
-
-  console.log(result);
-
-
+  await page.goto(url);
+  await callback(page);
   await browser.close();
-})();
+}
+
+(async function() {
+  await withPage('http://localhost:8081/index.html', async (page) => {
+    const result = await page.evaluate(async () => {
+      /* global document, lottie */
+
+      // Make render target for lottie-web
+      const container = document.createElement('div');
+      container.style.width = '400px';
+      container.style.height = '400px';
+      document.body.appendChild(container);
+
+      // Load an animation
+      const animation = lottie.loadAnimation({
+        container,
+        renderer: 'svg',
+        loop: false,
+        autoplay: false,
+        path: 'test/fixtures/cat_claphigh.json',
+      });
+
+      // Wait for that animation to be ready
+      await new Promise(resolve => animation.addEventListener('DOMLoaded', resolve));
+
+      // Capture all frames of the animation
+      const frameSvgs = [];
+      const {totalFrames} = animation;
+      for (var i = 0; i < totalFrames; i++) {
+        animation.goToAndStop(i, /* isFrame: */ true);
+        frameSvgs.push(container.querySelector('svg').outerHTML);
+      }
+
+      return frameSvgs;
+    });
+
+    console.log(result);
+    console.log('--- found frames ---');
+    console.log(result.length);
+  });
+}());

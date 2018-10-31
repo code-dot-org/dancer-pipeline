@@ -1,19 +1,34 @@
+const filesize = require('filesize');
 const fs = require('fs');
 const puppeteer = require('puppeteer');
 
-async function withPage(url, callback) {
+(async function () {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-  await page.goto(url);
-  await callback(page);
-  await browser.close();
-}
+  await page.goto('http://localhost:8081/index.html');
 
-(async function () {
-  await withPage('http://localhost:8081/index.html', async (page) => {
-    const result = await page.evaluate(async () => {
-      /* global document, lottie */
+  async function setup() {
+    await page.evaluate(() => {
+      /* global document, window */
       const SVGNS = 'http://www.w3.org/2000/svg';
+
+      // Make destination SVG
+      window.outputSVG = document.createElementNS(SVGNS, 'svg');
+      window.outputSVG.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      window.outputSVG.setAttribute('viewBox', '0 0 400 400');
+      window.outputSVG.setAttribute('width', '400');
+      window.outputSVG.setAttribute('height', '400');
+      window.outputSVG.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    });
+  }
+
+  async function renderAnimation(filename) {
+    // eslint-disable-next-line no-shadow
+    await page.evaluate(async (filename) => {
+      /* global document, lottie, window */
+      const SVGNS = 'http://www.w3.org/2000/svg';
+
+      const { outputSVG } = window;
 
       // Make render target for lottie-web
       const container = document.createElement('div');
@@ -21,21 +36,13 @@ async function withPage(url, callback) {
       container.style.height = '400px';
       document.body.appendChild(container);
 
-      // Make destination SVG
-      const outputSVG = document.createElementNS(SVGNS, 'svg');
-      outputSVG.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-      outputSVG.setAttribute('viewBox', '0 0 400 400');
-      outputSVG.setAttribute('width', '400');
-      outputSVG.setAttribute('height', '400');
-      outputSVG.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-
       // Load an animation
       const animation = lottie.loadAnimation({
         container,
         renderer: 'svg',
         loop: false,
         autoplay: false,
-        path: 'test/fixtures/cat_claphigh.json',
+        path: `test/fixtures/${filename}.json`,
       });
 
       // Wait for that animation to be ready
@@ -49,7 +56,7 @@ async function withPage(url, callback) {
         animation.goToAndStop(i, /* isFrame: */ true);
         // Clone the whole SVG contents into a new group in the output svg
         const frameGroup = document.createElementNS(SVGNS, 'g');
-        frameGroup.id = `cat_claphigh_${i.toString(10).padStart(2, '0')}`;
+        frameGroup.id = `${filename}_${i.toString(10).padStart(2, '0')}`;
         lottieSVG.childNodes.forEach((child) => {
           if (child.nodeName === 'defs') {
             if (i === 0) {
@@ -62,10 +69,45 @@ async function withPage(url, callback) {
         outputSVG.appendChild(frameGroup);
       }
 
+      document.body.removeChild(container);
+    }, filename);
+  }
+
+  function retrieveSvgMarkup() {
+    return page.evaluate(() => {
+      /* global window */
+      const { outputSVG } = window;
       return outputSVG.outerHTML;
     });
+  }
 
-    await new Promise((resolve, reject) => fs.writeFile('output/cat_claphigh.svg', result, err => (err ? reject(err) : resolve())));
-    console.log('written to output/cat_claphigh.svg');
-  });
+  async function writeToFile(filename, contents) {
+    await new Promise((resolve, reject) => {
+      fs.writeFile(filename, contents, (err) => {
+        if (err) {
+          console.log(err);
+          reject(err);
+        } else {
+          console.log(`Wrote ${filename} (${filesize(contents.length)})`);
+          resolve();
+        }
+      });
+    });
+  }
+
+  const dancerName = 'cat';
+  const moveNames = ['claphigh', 'clown', 'dab', 'doublejam', 'drop', 'floss',
+    'fresh', 'kick', 'rest', 'roll', 'thisorthat', 'thriller', 'xarmsside',
+    'xarmsup', 'xclapside', 'xheadhips', 'xhighkick', 'xjump'];
+
+  await setup();
+  for (let i = 0; i < moveNames.length; i++) {
+    await renderAnimation(`${dancerName}_${moveNames[i]}`);
+  }
+
+  const result = await retrieveSvgMarkup();
+  const outputFilename = `output/${dancerName}.svg`;
+  await writeToFile(outputFilename, result);
+
+  await browser.close();
 }());

@@ -9,3 +9,8 @@ npm install
 npm start
 ```
 
+## To-Do
+
+- Apply svgo before writing file
+- Verify results are in preferred format
+- Get Travis to commit or upload results automatically

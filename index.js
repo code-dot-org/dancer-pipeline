@@ -1,5 +1,5 @@
 const puppeteer = require('puppeteer');
-const optimizeSvg = require('./src/optimizeSvg');
+const {optimizeSvg, finalPass} = require('./src/optimizeSvg');
 const combineSvgFrames = require('./src/combineSvgFrames');
 const writeFile = require('./src/writeFile');
 
@@ -27,9 +27,6 @@ const writeFile = require('./src/writeFile');
     // eslint-disable-next-line no-shadow
     return page.evaluate(async (filename) => {
       /* global document, lottie, window */
-      const SVGNS = 'http://www.w3.org/2000/svg';
-
-      const { outputSVG } = window;
 
       // Make render target for lottie-web
       const container = document.createElement('div');
@@ -99,7 +96,8 @@ const writeFile = require('./src/writeFile');
   }
 
   const flattened = await combineSvgFrames(svgFrames);
-  await writeFile(`output/${dancerName}.min.svg`, flattened);
+  const final = await finalPass(flattened);
+  await writeFile(`output/${dancerName}.min.svg`, final);
 
   await browser.close();
 }());

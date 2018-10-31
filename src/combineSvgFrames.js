@@ -7,7 +7,7 @@ const asyncSvg2js = data => new Promise((resolve) => {
 
 module.exports = async (frames) => {
   let parent = '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">';
-  parent += Object.keys(frames).map(frameName => `<g id='${frameName}'></g>`);
+  parent += Object.keys(frames).map(frameName => `<g id='${frameName}'></g>`).join('\n');
   parent += '</svg>';
 
   const root = await asyncSvg2js(parent);

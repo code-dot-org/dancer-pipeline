@@ -12,6 +12,7 @@ module.exports = function optimizeSvg(input) {
       pretty: true,
       indent: 2,
     },
+    multipass: true,
     floatPrecision: 2,
     plugins: [{
       removeAttrs: {

@@ -106,6 +106,9 @@ const puppeteer = require('puppeteer');
   }
 
   const result = await retrieveSvgMarkup();
+  if (!fs.existsSync('output')){
+    fs.mkdirSync('output');
+  }
   const outputFilename = `output/${dancerName}.svg`;
   await writeToFile(outputFilename, result);
 

@@ -16,7 +16,9 @@ function *traverse(data) {
     return;
   }
 
-  yield data;
+  if (data.elem === 'g') {
+    yield data;
+  }
   for (let child of data.content) {
     yield *traverse(child);
   }
@@ -32,7 +34,7 @@ function simplify(node) {
 }
 
 function hashNode(node) {
-  return XXHash.hash(Buffer.from(JSON.stringify(simplify(node)), 'utf8'), 0xC0DE)
+  return XXHash.hash(Buffer.from(JSON.stringify(node.content.map(simplify)), 'utf8'), 0xC0DE)
 }
 
 function replaceNode(before, after) {
@@ -47,8 +49,9 @@ function replaceNode(before, after) {
   parent.spliceContent(indexWithinParent, 1, after);
 }
 
-function makeUse(hash) {
+function makeUse(hash, sourceNode) {
   const use = makeNode('use');
+  use.attrs = JSON.parse(JSON.stringify(sourceNode.attrs));
   use.attrs.href = {name: 'href', value: `#${hash}`};
   return use;
 }
@@ -86,12 +89,11 @@ exports.fn = function(data/*, params*/) {
   // Second pass: Move dedupe-able content to defs
   // Add a defs element
   const defs = makeNode('defs');
-  data.querySelector('svg').spliceContent(0, 0, defs);
 
   // Add dedupeable elements to defs
   for (let hash of Object.keys(decoder)) {
     const node = decoder[hash].clone();
-    node.attrs.id = {name: 'id', value: hash};
+    node.attrs = {id: {name: 'id', value: hash}};
     defs.spliceContent(0, 0, node);
   }
 
@@ -99,13 +101,13 @@ exports.fn = function(data/*, params*/) {
   for (let node of traverse(data)) {
     const hash = hashNode(node);
     if (decoder[hash]) {
-      replaceNode(node, makeUse(hash));
+      const use = makeUse(hash, node);
+      replaceNode(node, use);
     }
   }
 
+  data.querySelector('svg').spliceContent(0, 0, defs);
   histogram(Object.values(counts));
 
   return data;
 };
-
-

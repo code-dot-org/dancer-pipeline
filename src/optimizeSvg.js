@@ -9,10 +9,6 @@ const dedupeToDefs = require('./dedupeToDefs');
  */
 function optimizeSvg(input) {
   const svgo = new SVGO({
-    js2svg: {
-      pretty: true,
-      indent: 2,
-    },
     multipass: true,
     floatPrecision: 2,
     plugins: [
@@ -30,11 +26,6 @@ function optimizeSvg(input) {
 async function finalPass(input) {
   const dedupeSvgo = new SVGO({
     full: true,
-    js2svg: {
-      pretty: true,
-      indent: 2,
-    },
-    floatPrecision: 2,
     plugins: [
       {
         dedupeToDefs,
@@ -49,6 +40,7 @@ async function finalPass(input) {
       pretty: true,
       indent: 2,
     },
+    multipass: true,
     floatPrecision: 2,
     plugins: [
       {
@@ -58,11 +50,9 @@ async function finalPass(input) {
   });
 
   return svgo.optimize(deduped).then(result => result.data);
-
-
 }
 
 module.exports = {
   optimizeSvg,
-  finalPass
-}
+  finalPass,
+};

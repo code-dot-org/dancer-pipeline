@@ -51,7 +51,7 @@ const writeFile = require('./src/writeFile');
       // Capture all frames of the animation
       const result = [];
       const { totalFrames } = animation;
-      for (let i = 0; i < totalFrames; i++) {
+      for (let i = 0; i < totalFrames; i += 2) {
         animation.goToAndStop(i, /* isFrame: */ true);
         result.push(lottieSVG.outerHTML);
       }

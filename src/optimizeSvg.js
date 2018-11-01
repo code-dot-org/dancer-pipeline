@@ -18,6 +18,9 @@ function optimizeSvg(input) {
       {
         moveGroupAttrsToElems: false,
       },
+      {
+        convertTransform: false,
+      },
     ],
   });
   return svgo.optimize(input).then(result => result.data);

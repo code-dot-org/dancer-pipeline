@@ -40,7 +40,7 @@ const writeFile = require('./src/writeFile');
         renderer: 'svg',
         loop: false,
         autoplay: false,
-        path: `test/fixtures/${filename}.json`,
+        path: `input/cat/${filename}.json`,
       });
 
       // Wait for that animation to be ready

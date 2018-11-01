@@ -90,7 +90,7 @@ exports.fn = function(data/*, params*/) {
 
   // Add dedupeable elements to defs
   for (let hash of Object.keys(decoder)) {
-    const node = decoder[hash];
+    const node = decoder[hash].clone();
     node.attrs.id = {name: 'id', value: hash};
     defs.spliceContent(0, 0, node);
   }

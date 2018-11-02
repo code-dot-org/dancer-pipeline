@@ -19,15 +19,21 @@ module.exports = async (frames) => {
 
   const root = await asyncSvg2js(parent);
 
-  let i = 0;
+  let row = 0;
+  let column = 0;
+  let lastAnimationName = null;
   for (const frameName of Object.keys(frames)) {
+    const animationName = frameName.split('_')[0];
+    if (animationName !== lastAnimationName) {
+      column = 0;
+      row++;
+    }
     const converted = await asyncSvg2js(frames[frameName]);
     const g = root.querySelector(`#${frameName}`);
-    const x = i % 24;
-    const y = Math.trunc(i / 24);
-    i++;
-    g.attrs.transform = {name: 'transform', value: `translate(${x * 400}, ${y * 400})`};
+    g.attrs.transform = {name: 'transform', value: `translate(${column * 400}, ${row * 400})`};
     g.content = converted.querySelector('svg').content;
+    column++;
+    lastAnimationName = animationName;
   }
   return js2svg(root).data;
 };

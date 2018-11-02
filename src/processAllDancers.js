@@ -3,10 +3,11 @@ const Renderer = require('./Renderer');
 const { optimizeSvg, finalPass } = require('./optimizeSvg');
 const combineSvgFrames = require('./combineSvgFrames');
 
-function moveName(dancerName, fileName) {
-  const match = /^[^_]+_(.*)\.json$/i.exec(fileName);
-  return match && match[1];
-}
+module.exports = async function processAllDancers(/* argv */) {
+  const dancerDirs = await files.listDancerInputDirectories();
+  await Promise.all(dancerDirs.map(processDancer));
+  console.log('Done.');
+};
 
 /**
  * Locates all animation.json files for a character,
@@ -18,7 +19,7 @@ function moveName(dancerName, fileName) {
  * json files.
  * @return {Promise} resolved when final SVG has been written.
  */
-module.exports = async function processDancer(dancerName) {
+async function processDancer(dancerName) {
   try {
     const inputFiles = await files.listDancerInputFiles(dancerName);
     const renderer = new Renderer();
@@ -45,4 +46,9 @@ module.exports = async function processDancer(dancerName) {
   } catch (error) {
     console.log(`There was an error while processing ${dancerName}: ${error}`);
   }
-};
+}
+
+function moveName(dancerName, fileName) {
+  const match = /^[^_]+_(.*)\.json$/i.exec(fileName);
+  return match && match[1];
+}

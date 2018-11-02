@@ -1,8 +1,7 @@
-const files = require('./src/files');
-const processDancer = require('./src/processDancer');
+#!/usr/bin/env node
+const yargs = require('yargs');
+const processAllDancers = require('./src/processAllDancers');
 
-(async function main() {
-  const dancerDirs = await files.listDancerInputDirectories();
-  await Promise.all(dancerDirs.map(processDancer));
-  console.log('Done.');
-}());
+yargs
+  .command('*', 'Process all dancers', () => {}, processAllDancers)
+  .parse();

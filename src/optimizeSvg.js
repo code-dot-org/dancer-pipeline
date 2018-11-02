@@ -10,7 +10,6 @@ const dedupeToDefs = require('./dedupeToDefs');
 function optimizeSvg(input) {
   const svgo = new SVGO({
     multipass: true,
-    floatPrecision: 2,
     plugins: [
       {
         removeAttrs: { attrs: ['clip-path', 'display', 'style'] },

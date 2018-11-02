@@ -27,12 +27,12 @@ module.exports = async function processDancer(name) {
     'roll',
     'thisorthat',
     'thriller',
-    'xarmsside',
-    'xarmsup',
-    'xclapside',
-    'xheadhips',
-    'xhighkick',
-    'xjump',
+    // 'xarmsside',
+    // 'xarmsup',
+    // 'xclapside',
+    // 'xheadhips',
+    // 'xhighkick',
+    // 'xjump',
   ];
 
   const renderer = new Renderer();

@@ -5,11 +5,12 @@
 //
 
 /**
- * @param {string} filename
+ * @param {string} dancerName (also the directory name)
+ * @param {string} fileName
  * @returns {Promise<Array<string>>} Resolves to an array of strings where each
  *   string is an SVG document representing one frame of the animation.
  */
-async function renderAnimation(filename) {
+async function renderAnimation(dancerName, fileName) {
   // Make render target for lottie-web
   const container = document.createElement('div');
   container.style.width = '400px';
@@ -17,16 +18,25 @@ async function renderAnimation(filename) {
   document.body.appendChild(container);
 
   // Load an animation
+  const path = `/input/${dancerName}/${fileName}`;
   const animation = lottie.loadAnimation({
     container,
     renderer: 'svg',
     loop: false,
     autoplay: false,
-    path: `/input/cat/${filename}.json`,
+    path,
   });
 
   // Wait for that animation to be ready
-  await new Promise(resolve => animation.addEventListener('DOMLoaded', resolve));
+  const loadResult = await new Promise((resolve) => {
+    animation.addEventListener('DOMLoaded', resolve);
+    animation.addEventListener('data_failed', () => resolve(new Error(`Failed to load ${path}`)));
+  });
+
+  if (loadResult instanceof Error) {
+    // Returning a string instead of an array indicates an error
+    return loadResult.message;
+  }
 
   const lottieSVG = container.querySelector('svg');
 

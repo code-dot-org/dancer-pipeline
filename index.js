@@ -1,3 +1,6 @@
 const processDancer = require('./src/processDancer');
 
-processDancer('cat');
+
+(async function main() {
+  await processDancer('cat');
+}());

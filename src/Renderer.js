@@ -7,13 +7,15 @@ module.exports = class Renderer {
   }
 
   async initialize() {
+    // Use this form for debugging rendering problems in the browser.
+    // this.browser = await puppeteer.launch({headless: false});
     this.browser = await puppeteer.launch();
     this.page = await this.browser.newPage();
     await this.page.goto('http://localhost:8081/src/Renderer.html');
   }
 
-  async renderAnimation(filename) {
-    return this.page.evaluate(browser.renderAnimation, filename);
+  async renderAnimation(dancerName, fileName) {
+    return this.page.evaluate(browser.renderAnimation, dancerName, fileName);
   }
 
   async shutdown() {

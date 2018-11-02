@@ -52,7 +52,7 @@ function replaceNode(before, after) {
 function makeUse(hash, sourceNode) {
   const use = makeNode('use');
   use.attrs = JSON.parse(JSON.stringify(sourceNode.attrs));
-  use.attrs.href = {name: 'href', value: `#${hash}`};
+  use.attrs['xlink:href'] = {name: 'xlink:href', value: `#${hash}`};
   return use;
 }
 

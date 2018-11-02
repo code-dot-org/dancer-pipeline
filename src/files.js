@@ -29,6 +29,18 @@ function listDancerInputFiles(directory) {
   });
 }
 
+function listDancerOutputFiles() {
+  return new Promise((resolve, reject) => {
+    fs.readdir(`${OUTPUT_DIR}/`, (err, files) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(files);
+      }
+    });
+  });
+}
+
 function writeDancerOutput(dancerName, contents) {
   const fileName = `${OUTPUT_DIR}/${dancerName.toLowerCase()}.svg`;
   const dirname = path.dirname(fileName);
@@ -51,5 +63,6 @@ function writeDancerOutput(dancerName, contents) {
 module.exports = {
   listDancerInputDirectories,
   listDancerInputFiles,
+  listDancerOutputFiles,
   writeDancerOutput,
 };

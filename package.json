@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "postinstall": "mkdir -p vendor && ln -fs ../node_modules/lottie-web/build/player vendor/lottie",
-    "lint": "eslint .",
-    "test": "npm run lint && npm run start",
+    "_lint": "eslint index.js src test",
+    "lint": "npm run _lint -- --fix",
+    "test": "npm run _lint && npm run start",
     "prestart": "npm run start-server",
     "start": "node index.js",
     "poststart": "npm run stop-server",

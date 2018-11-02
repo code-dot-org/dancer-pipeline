@@ -1,25 +1,11 @@
-const fs = require('fs');
+const files = require('./files');
 const Renderer = require('./Renderer');
 const { optimizeSvg, finalPass } = require('./optimizeSvg');
 const combineSvgFrames = require('./combineSvgFrames');
-const writeFile = require('./writeFile');
 
 function moveName(dancerName, fileName) {
-  const re = new RegExp(`^${dancerName}_(.*).json$`, 'i');
-  const match = re.exec(fileName);
+  const match = /^[^_]+_(.*)\.json$/i.exec(fileName);
   return match && match[1];
-}
-
-function inputFiles(dancerName) {
-  return new Promise((resolve, reject) => {
-    fs.readdir(`input/${dancerName}/`, (err, files) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(files.filter(x => moveName(dancerName, x)));
-      }
-    });
-  });
 }
 
 /**
@@ -28,34 +14,34 @@ function inputFiles(dancerName) {
  * combines those into one SVG with a named group for each animation frame,
  * and optimizes the SVG to be ready for distribution.
  *
- * @param {string} dancerName - Should match the directory name containing the animation
- *   json files and the character part of the json filename.
+ * @param {string} dancerName - Should also be the directory name containing the animation
+ * json files.
  * @return {Promise} resolved when final SVG has been written.
  */
 module.exports = async function processDancer(dancerName) {
   try {
-    const files = await inputFiles(dancerName);
+    const inputFiles = await files.listDancerInputFiles(dancerName);
     const renderer = new Renderer();
     await renderer.initialize();
     const svgFrames = {};
-    for (let i = 0; i < files.length; i++) {
-      const fileName = files[i];
+    for (let i = 0; i < inputFiles.length; i++) {
+      const fileName = inputFiles[i];
       const move = moveName(dancerName, fileName);
-      console.log(`Rendering ${dancerName} ${move}...`);
+      console.log(`Rendering ${fileName}`);
       const frames = await renderer.renderAnimation(dancerName, fileName);
       // If we get a string back, an error occurred
       if (typeof frames === 'string') {
         throw new Error(frames);
       }
       for (let j = 0; j < frames.length; j++) {
-        svgFrames[`${move}_${j}`] = await optimizeSvg(frames[j]);
+        svgFrames[`${move.toLowerCase()}_${j}`] = await optimizeSvg(frames[j]);
       }
     }
     await renderer.shutdown();
 
     const flattened = await combineSvgFrames(svgFrames);
     const final = await finalPass(flattened);
-    await writeFile(`output/${dancerName}.svg`, final);
+    await files.writeDancerOutput(dancerName, final);
   } catch (error) {
     console.log(`There was an error while processing ${dancerName}: ${error}`);
   }

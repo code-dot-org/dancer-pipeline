@@ -1,4 +1,8 @@
+const files = require('./src/files');
 const processDancer = require('./src/processDancer');
 
-const dancers = ['bear', 'cat', 'dog', 'duck', 'frog', 'moose', 'robot', 'unicorn'];
-Promise.all(dancers.map(processDancer));
+(async function main() {
+  const dancerDirs = await files.listDancerInputDirectories();
+  await Promise.all(dancerDirs.map(processDancer));
+  console.log('Done.');
+}());

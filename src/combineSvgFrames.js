@@ -21,7 +21,7 @@ module.exports = async (frames) => {
 
   let row = 0;
   let column = 0;
-  let lastAnimationName = null;
+  let lastAnimationName = Object.keys(frames)[0].split('_')[0];
   for (const frameName of Object.keys(frames)) {
     const animationName = frameName.split('_')[0];
     if (animationName !== lastAnimationName) {

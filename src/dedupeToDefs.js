@@ -1,4 +1,3 @@
-'use strict';
 const XXHash = require('xxhash');
 const JSAPI = require('svgo/lib/svgo/jsAPI');
 
@@ -8,10 +7,9 @@ exports.active = true;
 
 exports.description = 'deduplicates parts of SVG into defs';
 
-exports.params = {
-};
+exports.params = {};
 
-function *traverse(data) {
+function* traverse(data) {
   if (!data.content || data.content.length === 0) {
     return;
   }
@@ -19,22 +17,22 @@ function *traverse(data) {
   if (data.elem === 'g') {
     yield data;
   }
-  for (let child of data.content) {
-    yield *traverse(child);
+  for (const child of data.content) {
+    yield* traverse(child);
   }
 }
 
 function simplify(node) {
-  const {elem, attrs, content} = node;
+  const { elem, attrs, content } = node;
   return {
     elem,
     attrs,
-    content: content && content.map(simplify)
+    content: content && content.map(simplify),
   };
 }
 
 function hashNode(node) {
-  return XXHash.hash(Buffer.from(JSON.stringify(node.content.map(simplify)), 'utf8'), 0xC0DE)
+  return XXHash.hash(Buffer.from(JSON.stringify(node.content.map(simplify)), 'utf8'), 0xC0DE);
 }
 
 function replaceNode(before, after) {
@@ -52,7 +50,7 @@ function replaceNode(before, after) {
 function makeUse(hash, sourceNode) {
   const use = makeNode('use');
   use.attrs = JSON.parse(JSON.stringify(sourceNode.attrs));
-  use.attrs.href = {name: 'href', value: `#${hash}`};
+  use.attrs.href = { name: 'href', value: `#${hash}` };
   return use;
 }
 
@@ -62,23 +60,23 @@ function makeNode(type) {
     prefix: '',
     local: type,
     attrs: {},
-  }, false)
-  defs.content = []
-  return defs
+  }, false);
+  defs.content = [];
+  return defs;
 }
 
 function histogram(counts) {
-  counts = counts.filter(n => n > 1).sort((a,b) => a-b);
-  for (let n of counts) {
-    console.log(n.toString().padStart(4) + ' ' + ('|'.repeat(n)));
+  const filteredCounts = counts.filter(n => n > 1).sort((a, b) => a - b);
+  for (const n of filteredCounts) {
+    console.log(`${n.toString().padStart(4)} ${'|'.repeat(n)}`);
   }
 }
 
-exports.fn = function(data/*, params*/) {
+exports.fn = function (data/* , params */) {
   // First pass: Count potential dedupes
   const counts = {};
   const decoder = {};
-  for (let node of traverse(data)) {
+  for (const node of traverse(data)) {
     const hash = hashNode(node);
     counts[hash] = (counts[hash] || 0) + 1;
     if (counts[hash] > 1) {
@@ -91,14 +89,14 @@ exports.fn = function(data/*, params*/) {
   const defs = makeNode('defs');
 
   // Add dedupeable elements to defs
-  for (let hash of Object.keys(decoder)) {
+  for (const hash of Object.keys(decoder)) {
     const node = decoder[hash].clone();
-    node.attrs = {id: {name: 'id', value: hash}};
+    node.attrs = { id: { name: 'id', value: hash } };
     defs.spliceContent(0, 0, node);
   }
 
   // Replace contents with '<use>' references
-  for (let node of traverse(data)) {
+  for (const node of traverse(data)) {
     const hash = hashNode(node);
     if (decoder[hash]) {
       const use = makeUse(hash, node);

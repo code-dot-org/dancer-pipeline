@@ -5,7 +5,7 @@ const path = require('path');
 module.exports = function writeToFile(filename, contents) {
   const dirname = path.dirname(filename);
   if (!fs.existsSync(dirname)) {
-    fs.mkdirSync(dirname, {recursive: true});
+    fs.mkdirSync(dirname, { recursive: true });
   }
   return new Promise((resolve, reject) => {
     fs.writeFile(filename, contents, (err) => {

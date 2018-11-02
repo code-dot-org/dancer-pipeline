@@ -6,8 +6,8 @@
 
 /**
  * @param {string} filename
- * @returns {Promise<Array<string>>} Resolves to an array of strings where each string is an SVG document
- *   representing one frame of the animation.
+ * @returns {Promise<Array<string>>} Resolves to an array of strings where each
+ *   string is an SVG document representing one frame of the animation.
  */
 async function renderAnimation(filename) {
   // Make render target for lottie-web

@@ -13,7 +13,7 @@ function optimizeSvg(input) {
     floatPrecision: 2,
     plugins: [
       {
-        removeAttrs: {attrs: ['clip-path', 'display', 'style']},
+        removeAttrs: { attrs: ['clip-path', 'display', 'style'] },
       },
       {
         moveGroupAttrsToElems: false,
@@ -24,7 +24,7 @@ function optimizeSvg(input) {
     ],
   });
   return svgo.optimize(input).then(result => result.data);
-};
+}
 
 async function finalPass(input) {
   const dedupeSvgo = new SVGO({

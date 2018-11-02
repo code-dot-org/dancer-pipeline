@@ -4,13 +4,23 @@ Uses [lottie](https://github.com/airbnb/lottie-web) and [svgo](https://github.co
 
 ## Get started:
 
+You should be using node >= 8.0.
+
 ```sh
+# Set up
 npm install
-npm start
+npm run start-server
+
+# Turn .json files into optimized SVGs
+./index.js
+
+# Preview optimized SVGs
+./index.js preview --speed=2
+
+# Clean up
+npm run stop-server
 ```
 
 ## To-Do
 
-- Apply svgo before writing file
-- Verify results are in preferred format
 - Get Travis to commit or upload results automatically

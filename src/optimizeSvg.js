@@ -49,6 +49,9 @@ async function finalPass(input) {
       {
         cleanupIDs: false,
       },
+      {
+        convertTransform: false,
+      },
     ],
   });
 

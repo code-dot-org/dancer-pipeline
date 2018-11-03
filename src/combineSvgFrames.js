@@ -30,7 +30,7 @@ module.exports = async (frames) => {
     }
     const converted = await asyncSvg2js(frames[frameName]);
     const g = root.querySelector(`#${frameName}`);
-    g.attrs.transform = {name: 'transform', value: `translate(${column * 400}, ${row * 400})`};
+    g.attrs.transform = { name: 'transform', value: `translate(${column * 400}, ${row * 400})` };
     g.content = converted.querySelector('svg').content;
     column++;
     lastAnimationName = animationName;

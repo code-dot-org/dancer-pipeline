@@ -1,4 +1,4 @@
-/* global document, lottie */
+/* global window, document, lottie */
 //
 // Methods that run in the browser context of the renderer
 // They can't share state with node-land anyway, except through passed arguments.
@@ -23,8 +23,12 @@ async function renderAnimation(dancerName, fileName) {
   const { layers } = json.assets[0];
 
   // Tag head and body
-  layers.find(layer => /head/i.test(layer.nm)).cl = 'head';
-  layers.find(layer => /body/i.test(layer.nm)).cl = 'body';
+  layers.forEach((layer) => {
+    const match = layer.nm.match(/head|body|(left|right) (arm|leg)/i);
+    if (match) {
+      layer.cl = match[0].toLowerCase();
+    }
+  });
 
   // Render in bodymovin
   const animation = lottie.loadAnimation({

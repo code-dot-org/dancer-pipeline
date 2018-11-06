@@ -2,6 +2,7 @@
   "extends": "airbnb-base",
   "rules": {
     "no-await-in-loop": "warn",
+    "no-param-reassign": ["warn", { "props": false }],
     "no-plusplus": "off",
     "no-restricted-syntax": "warn",
     "no-use-before-define": "warn"

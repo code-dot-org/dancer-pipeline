@@ -24,6 +24,13 @@ async function processDancer(dancerName) {
     const inputFiles = await files.listDancerInputFiles(dancerName);
     const renderer = new Renderer();
     await renderer.initialize();
+
+    // Structured:
+    // {
+    //   "moveName": {
+    //     "moveName_frameNum": svgString
+    //   }
+    // }
     const svgFrames = {};
     for (let i = 0; i < inputFiles.length; i++) {
       const fileName = inputFiles[i];
@@ -34,8 +41,9 @@ async function processDancer(dancerName) {
       if (typeof frames === 'string') {
         throw new Error(frames);
       }
+      svgFrames[move.toLowerCase()] = {};
       for (let j = 0; j < frames.length; j++) {
-        svgFrames[`${move.toLowerCase()}_${j}`] = await optimizeSvg(frames[j]);
+        svgFrames[move.toLowerCase()][`${move.toLowerCase()}_${j}`] = await optimizeSvg(frames[j]);
       }
     }
     await renderer.shutdown();

@@ -5,7 +5,7 @@ const asyncSvg2js = data => new Promise((resolve) => {
   svg2js(data, resolve);
 });
 
-module.exports = async (frames) => {
+module.exports = async (moves_frames) => {
   let parent = `
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -14,26 +14,25 @@ module.exports = async (frames) => {
       height="480"
       viewBox="0 0 9600 9600"
     >`;
-  parent += Object.keys(frames).map(frameName => `<g id='${frameName}'></g>`).join('\n');
+  parent += Object.keys(moves_frames).map((moveName) => {
+    return Object.keys(moves_frames[moveName]).map(frameName => `<g id='${frameName}'></g>`).join('');
+  }).join('');
   parent += '</svg>';
 
   const root = await asyncSvg2js(parent);
 
   let row = 0;
-  let column = 0;
-  let lastAnimationName = Object.keys(frames)[0].split('_')[0];
-  for (const frameName of Object.keys(frames)) {
-    const animationName = frameName.split('_')[0];
-    if (animationName !== lastAnimationName) {
-      column = 0;
-      row++;
+  for (const moveName of Object.keys(moves_frames)) {
+    let column = 0;
+    const moveFrames = moves_frames[moveName];
+    for (const frameName of Object.keys(moveFrames)) {
+      const converted = await asyncSvg2js(moveFrames[frameName]);
+      const g = root.querySelector(`#${frameName}`);
+      g.attrs.transform = { name: 'transform', value: `translate(${column * 400}, ${row * 400})` };
+      g.content = converted.querySelector('svg').content;
+      column++;
     }
-    const converted = await asyncSvg2js(frames[frameName]);
-    const g = root.querySelector(`#${frameName}`);
-    g.attrs.transform = { name: 'transform', value: `translate(${column * 400}, ${row * 400})` };
-    g.content = converted.querySelector('svg').content;
-    column++;
-    lastAnimationName = animationName;
+    row++;
   }
   return js2svg(root).data;
 };

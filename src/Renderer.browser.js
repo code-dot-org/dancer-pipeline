@@ -19,24 +19,22 @@ async function renderAnimation(dancerName, fileName) {
 
   // Load an animation
   const path = `/input/${dancerName}/${fileName}`;
+  const json = await (await window.fetch(path)).json();
+  const { layers } = json.assets[0];
+
+  // Tag head and body
+  layers.find(layer => /head/i.test(layer.nm)).cl = 'head';
+  layers.find(layer => /body/i.test(layer.nm)).cl = 'body';
+
+  // Render in bodymovin
   const animation = lottie.loadAnimation({
     container,
     renderer: 'svg',
     loop: false,
     autoplay: false,
-    path,
+    animationData: json,
   });
 
-  // Wait for that animation to be ready
-  const loadResult = await new Promise((resolve) => {
-    animation.addEventListener('DOMLoaded', resolve);
-    animation.addEventListener('data_failed', () => resolve(new Error(`Failed to load ${path}`)));
-  });
-
-  if (loadResult instanceof Error) {
-    // Returning a string instead of an array indicates an error
-    return loadResult.message;
-  }
 
   const lottieSVG = container.querySelector('svg');
 
